@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plane Game</title>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            background-color: #87ceeb;
+        }
+        #gameCanvas {
+            display: block;
+            background: url('sky-background.jpg') no-repeat center center;
+            background-size: cover;
+        }
+        #plane {
+            position: absolute;
+            width: 150px;
+            height: 150px;
+            background: url('plane.jpg') no-repeat center center;
+            background-size: cover;
+        }
+        #target {
+            position: absolute;
+            width: 300px;
+            height: 300px;
+            background: url('target.jpg') no-repeat center center;
+            background-size: cover;
+        }
+        #counter {
+            position: fixed;
+            bottom: 10px;
+            right: 10px;
+            font-size: 24px;
+            background: rgba(255, 255, 255, 0.7);
+            padding: 10px;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div id="plane"></div>
+    <div id="target"></div>
+    <div id="counter">Targets hit: 0</div>
+    <script>
+        const plane = document.getElementById('plane');
+        const target = document.getElementById('target');
+        const counter = document.getElementById('counter');
+        const planeSize = 150;
+        const targetSize = 300;
+        const step = 150;
+        const rightStep = 10; // Speed of the plane moving to the right
+
+        // Retrieve the hit count from local storage or initialize it
+        let targetsHit = localStorage.getItem('targetsHit') ? parseInt(localStorage.getItem('targetsHit')) : 0;
+        counter.innerText = `Kills: ${targetsHit}`;
+
+        // Initial positions
+        let planeX = 100;
+        let planeY = 100;
+        let targetX = window.innerWidth - targetSize - 100;
+        let targetY = Math.random() * (window.innerHeight - targetSize);
+
+        // Set target position
+        target.style.left = targetX + 'px';
+        target.style.top = targetY + 'px';
+
+        // Update plane position
+        function updatePlanePosition() {
+            planeX += rightStep; // Move the plane to the right
+            plane.style.left = planeX + 'px';
+            plane.style.top = planeY + 'px';
+
+            // Check for collision
+            if (planeX < targetX + targetSize && planeX + planeSize > targetX &&
+                planeY < targetY + targetSize && planeY + planeSize > targetY) {
+                target.style.backgroundImage = 'url("target-hit.jpg")';
+                targetsHit+=10;
+                localStorage.setItem('targetsHit', targetsHit);
+                counter.innerText = `Kills: ${targetsHit}`;
+                setTimeout(() => location.reload(), 1000); // Reload the page after 1 second
+            }
+
+            // Check if plane moves off screen and reload page
+            if (planeX > window.innerWidth) {
+                location.reload();
+            }
+        }
+
+        // Control the plane with up and down arrow keys
+        document.addEventListener('keydown', (e) => {
+            switch (e.key) {
+                case 'ArrowUp':
+                    planeY = Math.max(0, planeY - step);
+                    break;
+                case 'ArrowDown':
+                    planeY = Math.min(window.innerHeight - planeSize, planeY + step);
+                    break;
+            }
+        });
+
+        // Initial plane position update
+        updatePlanePosition();
+        
+        // Move the plane to the right continuously
+        setInterval(updatePlanePosition, 20);
+    </script>
+</body>
+</html>
